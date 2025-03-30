@@ -5,11 +5,12 @@ import NotFound from "./NotFound";
 import "./index.css";
 import App from "./App";
 import { PokemonPage } from "./components/Pokemon/PokemonPage/PokemonPage";
-
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
+      <SpeedInsights />
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="pokemon/:id" element={<PokemonPage />} />
@@ -19,6 +20,5 @@ createRoot(document.getElementById("root")!).render(
         />
       </Routes>
     </BrowserRouter>
-   
   </StrictMode>
 );
