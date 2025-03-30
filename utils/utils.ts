@@ -1,5 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import { Pokemon, PokemonCardDetails, PokemonFullDetails } from "../types";
+import { AxiosResponse } from "axios";
+import { PokemonCardDetails, PokemonFullDetails } from "../types";
 
 export const getTypeColor = (type: string): string => {
   const typeColors: Record<string, string> = {
@@ -70,34 +70,6 @@ export const sortResults = (list: PokemonCardDetails[], sortType: string) => {
         return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
       default:
         return 0;
-    } 
+    }
   });
-};
-
-export const filterIncludes = async (query: string) => {
-  try {
-    const response = await axios.get(
-      "https://pokeapi.co/api/v2/pokemon?limit=1010"
-    );
-
-    const filteredPokemons = response.data.results.filter((p: Pokemon) => {
-      const pokemonId = p.url.match(/\/(\d+)\/$/)?.[1] || "";
-      return (
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        pokemonId.includes(query)
-      );
-    });
-
-    const PokemonCardDetailsRequests = filteredPokemons.map(
-      (pokemon: Pokemon) => axios.get(pokemon.url)
-    );
-
-    const detailedResponses = await Promise.all(PokemonCardDetailsRequests);
-    const detailedPokemons = await extractPokemonCardDetails(detailedResponses);
-
-    return detailedPokemons;
-  } catch (error) {
-    console.error("Error fetching Pokémon list:", error);
-    return [];
-  }
 };

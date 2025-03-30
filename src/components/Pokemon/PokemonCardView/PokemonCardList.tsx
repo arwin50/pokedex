@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Pokemon, PokemonCardDetails } from "../../../../types/index";
+import type { Pokemon, PokemonCardDetails } from "../../../../types/index";
 import { PokemonCard } from "./PokemonCard";
 import { FunctionBar } from "../../FunctionBar/FunctionBar";
 import {
-  filterIncludes,
   extractPokemonCardDetails,
   sortResults,
 } from "../../../../utils/utils";
@@ -12,93 +13,136 @@ import LoadingOverlay from "../../LoadingOverlay";
 
 export const PokemonCardList = () => {
   const [allPokemon, setAllPokemon] = useState<PokemonCardDetails[]>([]);
-  const [displayedPokemon, setDisplayedPokemon] = useState<
-    PokemonCardDetails[]
-  >([]);
-  const [searchResults, setSearchResults] = useState<
-    PokemonCardDetails[] | null
-  >(null);
-  const [offset, setOffset] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("ascendingId");
+  const [displayCount, setDisplayCount] = useState(10);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  const POKEMON_PER_PAGE = 10;
+  const MAX_POKEMON = 1010;
 
   useEffect(() => {
     const fetchAllPokemon = async () => {
-      setLoading(true);
+      setInitialLoading(true);
       try {
-        const maxPokemon = 1010;
-        const response = await axios.get("https://pokeapi.co/api/v2/pokemon", {
-          params: { limit: maxPokemon, offset: 0 },
-        });
+        // Fetch Pokémon in batches to avoid overwhelming the API
+        const batchSize = 100;
+        let allFetchedPokemon: PokemonCardDetails[] = [];
 
-        const pokemonListOverview: Pokemon[] = response.data.results;
+        for (let offset = 0; offset < MAX_POKEMON; offset += batchSize) {
+          const limit = Math.min(batchSize, MAX_POKEMON - offset);
 
-        // Fetch details for all Pokémon
-        const pokemonDetailRequests = pokemonListOverview.map((pokemon) =>
-          axios.get(pokemon.url)
-        );
-        const detailedResponses = await Promise.all(pokemonDetailRequests);
-        const allFetchedPokemon = extractPokemonCardDetails(detailedResponses);
+          // Fetch batch of Pokémon
+          const response = await axios.get(
+            "https://pokeapi.co/api/v2/pokemon",
+            {
+              params: { limit, offset },
+            }
+          );
 
-        // Store in state
-        setAllPokemon(allFetchedPokemon);
+          const pokemonBatch: Pokemon[] = response.data.results;
 
-        // Apply initial sorting and pagination
+          const detailRequests = pokemonBatch.map((pokemon) =>
+            axios.get(pokemon.url)
+          );
+
+          const detailedResponses = await Promise.all(detailRequests);
+          const detailedPokemon = extractPokemonCardDetails(detailedResponses);
+
+          allFetchedPokemon = [...allFetchedPokemon, ...detailedPokemon];
+        }
+
+        // Sort the initial data
         const sortedPokemon = sortResults(allFetchedPokemon, sortBy);
-        setDisplayedPokemon(sortedPokemon.slice(0, 10));
+        setAllPokemon(sortedPokemon);
       } catch (error) {
-        console.error("Error fetching Pokémon:", error);
+        console.error("Error fetching all Pokémon:", error);
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
       }
     };
 
-    if (allPokemon.length === 0) {
-      fetchAllPokemon();
-    } else {
-      // Sort and paginate already fetched data
-      const sortedPokemon = sortResults(allPokemon, sortBy);
-      setDisplayedPokemon(sortedPokemon.slice(offset, offset + 10));
+    fetchAllPokemon();
+  }, []);
+
+  useEffect(() => {
+    if (allPokemon.length > 0) {
+      setAllPokemon(sortResults([...allPokemon], sortBy));
+      setDisplayCount(POKEMON_PER_PAGE);
     }
-  }, [sortBy, offset, allPokemon]);
+  }, [sortBy]);
 
   const handleSearch = async (query: string) => {
-    if (!query) {
-      setSearchResults(null);
-      return;
-    }
-    const results = await filterIncludes(query);
-    setSearchResults(sortResults(results, sortBy));
+    setLoading(true);
+    setSearchQuery(query);
+    setDisplayCount(POKEMON_PER_PAGE);
+    setLoading(false);
   };
 
+  // Handle sort
   const handleSort = (selectedSort: string) => {
     setSortBy(selectedSort);
-    if (searchResults) {
-      setSearchResults(sortResults([...searchResults], selectedSort));
-    }
   };
 
+  const filteredAndSortedPokemon = useMemo(() => {
+    if (!searchQuery) {
+      return allPokemon;
+    }
+
+    return allPokemon.filter(
+      (pokemon) =>
+        pokemon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pokemon.id.toString().includes(searchQuery)
+    );
+  }, [allPokemon, searchQuery]);
+
+  const pokemonToDisplay = useMemo(() => {
+    return filteredAndSortedPokemon.slice(0, displayCount);
+  }, [filteredAndSortedPokemon, displayCount]);
+
+  const handleLoadMore = () => {
+    setDisplayCount((prevCount) => prevCount + POKEMON_PER_PAGE);
+  };
+
+  const hasMore = displayCount < filteredAndSortedPokemon.length;
+
   return (
-    <div className="flex flex-col gap-2 items-center">
+    <div className="flex flex-col gap-2 items-center w-full">
       <FunctionBar onSearch={handleSearch} onSort={handleSort} />
-      {loading && <LoadingOverlay />}
-      <div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-2 lg:gap-4 justify-items-center">
-          {(searchResults ?? displayedPokemon).map((pokemon) => (
-            <PokemonCard key={pokemon.id} {...pokemon} />
-          ))}
+
+      {initialLoading ? (
+        <LoadingOverlay />
+      ) : (
+        <div>
+          {loading && <LoadingOverlay />}
+
+          {filteredAndSortedPokemon.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-lg">No Pokémon found matching your search.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-2 lg:gap-4 justify-items-center">
+                {pokemonToDisplay.map((pokemon) => (
+                  <PokemonCard key={pokemon.id} {...pokemon} />
+                ))}
+              </div>
+
+              {hasMore && (
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={handleLoadMore}
+                    className="px-8 py-2 rounded-lg cursor-pointer bg-[#ee4b4b] text-white hover:scale-105 transition"
+                  >
+                    Load More Pokémons
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
-        {!searchResults && !loading && (
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={() => setOffset((prevOffset) => prevOffset + 10)}
-              className="px-8 py-2 rounded-lg cursor-pointer bg-[#ee4b4b] text-white hover:scale-105 transition"
-            >
-              Load More Pokémons
-            </button>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };
