@@ -5,6 +5,7 @@ import NotFound from "./NotFound";
 import "./index.css";
 import App from "./App";
 import { PokemonPage } from "./components/Pokemon/PokemonPage/PokemonPage";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -16,6 +17,7 @@ createRoot(document.getElementById("root")!).render(
           path="*"
           element={<NotFound message={"Page cannot be found"} />}
         />
+        <SpeedInsights />
       </Routes>
     </BrowserRouter>
   </StrictMode>
