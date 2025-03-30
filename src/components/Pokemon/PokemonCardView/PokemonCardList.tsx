@@ -5,7 +5,10 @@ import axios from "axios";
 import type { Pokemon, PokemonCardDetails } from "../../../../types/index";
 import { PokemonCard } from "./PokemonCard";
 import { FunctionBar } from "../../FunctionBar/FunctionBar";
-import { extractPokemonCardDetails, sortResults } from "../../../../utils/index";
+import {
+  extractPokemonCardDetails,
+  sortResults,
+} from "../../../../utils/index";
 import LoadingOverlay from "../../LoadingOverlay";
 
 export const PokemonCardList = () => {
@@ -27,6 +30,10 @@ export const PokemonCardList = () => {
         const batchSize = 100;
         let allFetchedPokemon: PokemonCardDetails[] = [];
 
+        // This loop fetches batches of Pokemon (100 per batch) in each iteration.
+        // Each batch fetches Pokémon details and adds them to the `allFetchedPokemon` list.
+        // I decided to collect the pokemon's first before sorting and filtering.
+
         for (let offset = 0; offset < MAX_POKEMON; offset += batchSize) {
           const limit = Math.min(batchSize, MAX_POKEMON - offset);
 
@@ -45,6 +52,10 @@ export const PokemonCardList = () => {
           );
 
           const detailedResponses = await Promise.all(detailRequests);
+
+          // Use extractPokemonCardDetails to transform the raw Pokémon data into a structured format
+          // that can be used for the card components (e.g., adding images, abilities, etc.).
+
           const detailedPokemon = extractPokemonCardDetails(detailedResponses);
 
           allFetchedPokemon = [...allFetchedPokemon, ...detailedPokemon];
@@ -77,7 +88,6 @@ export const PokemonCardList = () => {
     setLoading(false);
   };
 
-  // Handle sort
   const handleSort = (selectedSort: string) => {
     setSortBy(selectedSort);
   };

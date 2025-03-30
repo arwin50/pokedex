@@ -27,6 +27,7 @@ export const PokemonPage = () => {
           `https://pokeapi.co/api/v2/pokemon/${id}`
         );
 
+        // checking if the id is greater than 1010, since 1010 is the limit.
         if (response.data.id > 1010) {
           setIsError(true);
           console.warn(`Pokemon with ID ${response.data.id} is out of range.`);
@@ -36,15 +37,22 @@ export const PokemonPage = () => {
           return;
         }
 
+        // maps the necessary data of a pokemon to be displayed
         const pokemonDetails = extractPokemonFullDetails(response);
         setPokemon(pokemonDetails);
 
         const typeNames = pokemonDetails.types.map((t) => t.type.name);
+
+        // weaknesses in the function getTypeWeakness(arg1,arg2) are computed follows:
+        // weaknesses of each type are combined, so are the types that the pokemon has resistance to.
+        // next we remove the types present both in the weakness and resistance set.
+        // we then check each weakness type if it is weak against any of the particular pokemon's types.
+        // if it is weak, then we remove it.
         const computedWeaknesses = getTypeWeakness(typeNames[0], typeNames[1]);
         setWeaknesses(computedWeaknesses);
       } catch (error) {
         setIsError(true);
-        console.error(`Pokemon "${id}" not found.`, error);
+        console.error(`Pokemon "${id}" not found.`, error); //if user enters an invalid id such as an alphanumeric id
         setErrorMessage(`Pokemon "${id}" not found.`);
       }
     };
@@ -64,7 +72,6 @@ export const PokemonPage = () => {
         </Link>
 
         <div className="w-full flex flex-col md:flex-row items-center justify-between max-w-5xl px-4">
-          {/* Previous Button */}
           {id && (
             <Link
               to={`/pokemon/${Number(id) === 1 ? 1010 : Number(id) - 1}`}
@@ -74,7 +81,6 @@ export const PokemonPage = () => {
             </Link>
           )}
 
-          {/* Pokémon Details Container */}
           <div className="flex flex-col md:flex-row gap-x-4 w-full max-w-4xl">
             <div className="flex flex-col gap-y-4 flex-1 items-center">
               <div className="bg-gray-200 rounded-full p-8">
