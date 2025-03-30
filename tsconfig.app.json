@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "types", "utils"]
+  "include": ["src", "types", "utils", "pages/404.tsx"]
 }

@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router";
-import NotFound from "./404";
+import NotFound from "../pages/404";
 import "./index.css";
 import App from "./App";
 import { PokemonPage } from "./components/Pokemon/PokemonPage/PokemonPage";

@@ -4,7 +4,7 @@ import { PokemonFullDetails } from "../../../../types";
 import { extractPokemonFullDetails } from "../../../../utils";
 import { getTypeWeakness } from "../../../../utils/weakness";
 import { PokemonTypeBadge } from "../PokemonTypeBadge";
-import NotFound from "../../../404";
+import NotFound from "../../../../pages/404";
 import LoadingPage from "../../LoadingPage";
 import { Link, useParams } from "react-router";
 import { CgChevronLeft, CgChevronRight } from "react-icons/cg";
