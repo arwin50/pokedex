@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { PokemonFullDetails } from "../../../../types";
-import { extractPokemonFullDetails } from "../../../../utils/utils";
+import { extractPokemonFullDetails } from "../../../../utils";
 import { getTypeWeakness } from "../../../../utils/weakness";
 import { PokemonTypeBadge } from "../PokemonTypeBadge";
 import NotFound from "../../../NotFound";
@@ -57,7 +57,7 @@ export const PokemonPage = () => {
       <main className="w-full min-h-screen flex flex-col items-center font-openSans bg-gradient-to-b from-gray-50 to-gray-100 p-4">
         <Link to={"/"}>
           <img
-            src="../../src/assets/pokemon.png"
+            src="/pokemon.png"
             alt="logo"
             className="w-32 mb-8 my-6 hover:scale-110 hover:animate-pulse"
           />

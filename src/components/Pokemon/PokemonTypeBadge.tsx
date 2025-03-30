@@ -1,4 +1,4 @@
-import { getTypeColor } from "../../../utils/utils";
+import { getTypeColor } from "../../../utils";
 
 export const PokemonTypeBadge: React.FC<{ type: string }> = ({ type }) => {
   return (

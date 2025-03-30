@@ -12,7 +12,7 @@ export const FunctionBar = ({
     <nav className="flex w-[80%] md:w-[100%]  md:justify-evenly mb-2 flex-col md:flex-row">
       <a href="/" className="flex justify-center mb-3 md:block md:mb-0">
         <img
-          src="../../src/assets/pokemon.png"
+          src="/pokemon.png"
           alt="logo"
           className="w-32  object-contain hover:animate-pulse hover:scale-110 transition"
         />

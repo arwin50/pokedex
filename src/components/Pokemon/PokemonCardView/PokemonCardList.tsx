@@ -5,10 +5,7 @@ import axios from "axios";
 import type { Pokemon, PokemonCardDetails } from "../../../../types/index";
 import { PokemonCard } from "./PokemonCard";
 import { FunctionBar } from "../../FunctionBar/FunctionBar";
-import {
-  extractPokemonCardDetails,
-  sortResults,
-} from "../../../../utils/utils";
+import { extractPokemonCardDetails, sortResults } from "../../../../utils/index";
 import LoadingOverlay from "../../LoadingOverlay";
 
 export const PokemonCardList = () => {
