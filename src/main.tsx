@@ -17,8 +17,8 @@ createRoot(document.getElementById("root")!).render(
           path="*"
           element={<NotFound message={"Page cannot be found"} />}
         />
-        <SpeedInsights />
       </Routes>
     </BrowserRouter>
+    <SpeedInsights />
   </StrictMode>
 );
